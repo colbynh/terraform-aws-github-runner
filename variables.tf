@@ -37,6 +37,12 @@ variable "runner_ephemeral_mode_enabled" {
   default     = false
 }
 
+variable runner_role_arns {
+  type = list(string)
+  description = "Attach AWS or customer-managed IAM policies (by ARN) to the runner IAM role	"
+  default = []
+}
+
 variable "runner_version" {
   type        = string
   description = "Version of the GitHub Action runner."
@@ -52,6 +58,11 @@ variable "runner_os" {
   type        = string
   description = "Operating system for the GitHub Action runner."
   default     = "linux"
+}
+
+variable "runner_iam_role_managed_policy_arns" {
+  type        = list(string)
+  description = "IAM policy arns to attach to the runner"
 }
 
 variable "runner_pool_config" {
