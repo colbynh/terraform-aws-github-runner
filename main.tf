@@ -2,10 +2,11 @@ locals {
   enabled = coalesce(var.enabled, module.this.enabled, true)
   name    = coalesce(var.name, module.this.name, "github-runner-${random_string.github_runner_random_suffix.result}")
 
-  aws_account_id   = try(coalesce(var.aws_account_id, data.aws_caller_identity.current[0].account_id), "")
-  aws_region_name  = try(coalesce(var.aws_region_name, data.aws_region.current[0].name), "")
+  aws_account_id   = module.this.enabled && var.aws_account_id != "" ? var.aws_account_id : try(data.aws_caller_identity.current[0].account_id, "")
+  aws_region_name  = module.this.enabled && var.aws_region_name != "" ? var.aws_region_name : try(data.aws_region.current[0].name, "")
   aws_kv_namespace = trim(coalesce(var.aws_kv_namespace, "github-runner/${module.github_runner_label.id}"), "/")
 
+  runner_role_arns = "${concat(var.runner_role_arns, data.aws_iam_policy.runner.arn)}"
   docker_config_sm_secret_name = "${local.aws_kv_namespace}/config/docker"
   webhook_password             = coalesce(var.github_app_webhook_password, random_password.webhook.result)
 }
@@ -46,7 +47,7 @@ module "github_runner" {
   minimum_running_time_in_minutes         = var.runner_min_running_time
   runner_extra_labels                     = join(",", var.runner_labels)
   runner_as_root                          = true # required for docker
-  runner_iam_role_managed_policy_arns     = [aws_iam_policy.runner.arn]
+  runner_iam_role_managed_policy_arns     = local.runner_role_arns
   runner_binaries_s3_sse_configuration    = { rule = { apply_server_side_encryption_by_default = { sse_algorithm = "AES256" } } }
   runners_maximum_count                   = var.runner_maximum_count
   pool_runner_owner                       = var.github_organization
@@ -131,7 +132,7 @@ module "runner_binaries" {
   version = "1.3.2"
 
   artifact_src_type      = "directory"
-  artifact_dst_directory = "${path.module}/dist"
+  artifact_dst_directory = coalesce(var.runner_binaries_path, "${path.module}/dist")
   artifact_src_path      = "/tmp/runner-binaries"
   docker_build_context   = "${path.module}/assets/runner-binaries"
   docker_build_target    = "package"
@@ -143,17 +144,6 @@ module "runner_binaries" {
 # ---------------------------------------------------------------------- iam ---
 
 data "aws_iam_policy_document" "runner" {
-  statement {
-    sid    = "AllowSsmParameterAccess"
-    effect = "Allow"
-    actions = [
-      "ssm:GetParameter",
-    ]
-    resources = [
-      "arn:aws:ssm:us-east-1::parameter/aws/*",
-    ]
-  }
-
   statement {
     sid    = "AllowAccessToConfigSecret"
     effect = "Allow"

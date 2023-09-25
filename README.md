@@ -48,7 +48,10 @@ other optional variables (e.g., `name`, `tags`, etc.) provided by the
 | `github_app_webhook_password`        | Password for the GitHub app webhook. An empty string implies a randomly generated password. | `string`       | `""`                                  |    no    |
 | `github_organization_runner_enabled` | Toggle to activate runners for all projects in the organization.                            | `bool`         | `true`                                |    no    |
 | `key_pair_name`                     | Name of the key pair to associate with the runner                                              | `string`       | n/a                                   |   no    |
+| `runner_binaries_path`               | Path to the GitHub Action runner binaries saved locally before pushed to S3.                | `string`       | `""`                                  |    no    |
+| `key_pair_name`                   | Name of the key pair to associate with the runner                                              | `string`       | n/a                                   |   no    |
 | `runner_ephemeral_mode_enabled`      | Toggle to activate ephemeral runners.                                                       | `bool`         | `false`                               |    no    |
+| `runner_role_arns` | Attach AWS or customer-managed IAM policies (by ARN) to the runner IAM role                | `list(string)`  | n/a                                  |    no    |
 | `runner_version`                     | Version of the GitHub Action runner.                                                        | `string`       | n/a                                   |   yes    |
 | `runner_os`                          | Operating system for the GitHub Action runner.                                              | `string`       | `"linux"`                             |    no    |
 | `instance_ami_name`                  | Name of the Amazon Machine Image (AMI) for the GitHub Action runner.                        | `string`       | `"al2023-ami-2023.*-kernel-*-x86_64"` |    no    |
