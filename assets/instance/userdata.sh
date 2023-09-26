@@ -60,6 +60,9 @@ function provision_instance_stores {
 export -f provision_instance_stores
 
 # --- install: core -----------------------------
+
+
+
 yum upgrade -y
 
 sudo dnf upgrade --refresh rpm glibc
@@ -67,6 +70,10 @@ sudo rm /var/lib/rpm/.rpm.lock
 dnf -y update
 
 dnf install -y docker
+
+dnf upgrade --refresh rpm glibc
+rm /var/lib/rpm/.rpm.lock
+dnf -y update
 
 yum install --allowerasing -y \
   amazon-cloudwatch-agent \
